@@ -1,11 +1,21 @@
 import { users } from "../db/schema";
-import type { CreateNewUserDTO } from "../dtos/CreateNewUser.dto";
+import type { CreateNewUserDTO } from "../dtos/users/CreateNewUser.dto";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
+import type { UpdateUserDTO } from "../dtos/users/UpdateUser.dto";
 
 export class UserModel {
   async createNewUser(data: CreateNewUserDTO) {
     const result = await db.insert(users).values(data);
+
+    return result;
+  }
+
+  async updateUser(userId: number, data: UpdateUserDTO) {
+    const result = await db
+      .update(users)
+      .set({ ...data })
+      .where(eq(users.id, userId));
 
     return result;
   }
@@ -17,6 +27,7 @@ export class UserModel {
         name: users.name,
         email: users.email,
         username: users.username,
+        password: users.password,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
         deletedAt: users.deletedAt,
@@ -45,7 +56,10 @@ export class UserModel {
   }
 
   async softDeleteUserById(id: number) {
-    const result = await db.update(users).set({ deletedAt: new Date() }).where(eq(users.id, id));
+    const result = await db
+      .update(users)
+      .set({ deletedAt: new Date() })
+      .where(eq(users.id, id));
 
     return result;
   }
