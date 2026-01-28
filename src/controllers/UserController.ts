@@ -1,41 +1,56 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import { UserService } from "../services/UserService";
-import type { UserRequest } from "../types/UserRequest";
 import { STATUS_CODE } from "../constants/statusCode";
+import type { UserResponseWithoutPassword } from "../types/UserResponseWithoutPassword";
 
 export class UserController {
   constructor() {}
 
   private userService = new UserService();
 
-  async getAllUsers(req: UserRequest, res: Response) {
-    const result = await this.userService.getAllUsers();
+  async getAllUsers(req: Request, res: Response) {
+    const { page, pageSize, orderBy, filter } = req.query;
+
+    const result = await this.userService.getAllUsers({
+      page: Number(page),
+      pageSize: Number(pageSize),
+      orderBy: orderBy === "asc" ? "asc" : "desc",
+      filter: filter as string,
+    });
+
     return res.status(STATUS_CODE.OK).json(result);
   }
 
-  async getUserById(req: UserRequest, res: Response) {
+  async getUserById(req: Request, res: Response) {
     const { userId } = req.params;
     const result = await this.userService.getUserById(Number(userId));
     return res.status(STATUS_CODE.OK).json(result);
   }
 
-  async createNewUser(req: UserRequest, res: Response) {
-    const { body } = req;
-    const result = await this.userService.createNewUser(body);
+  async getSelf(req: Request, res: Response) {
+    const user = req.user as UserResponseWithoutPassword;
+
+    const result = await this.userService.getUserById(user.id);
+    return res.status(STATUS_CODE.OK).json(result);
+  }
+
+  async createNewUser(req: Request, res: Response) {
+    const result = await this.userService.createNewUser(req.body);
+
     return res.status(STATUS_CODE.CREATED).json(result);
   }
 
-  async softDeleteUserById(req: UserRequest, res: Response) {
+  async softDeleteUserById(req: Request, res: Response) {
     const { userId } = req.params;
     const result = await this.userService.softDeleteUserById(Number(userId));
     return res.status(STATUS_CODE.OK).json(result);
   }
 
-  async updateUserById(req: UserRequest, res: Response) {
-    const { userId } = req.params;
+  async updateUser(req: Request, res: Response) {
+    const userId = req.user?.id;
     const { body } = req;
 
-    const result = await this.userService.updateUserById(Number(userId), body);
+    const result = await this.userService.updateUser(Number(userId), body);
 
     return res.status(STATUS_CODE.OK).json(result);
   }
