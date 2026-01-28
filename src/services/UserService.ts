@@ -8,35 +8,26 @@ import {
 } from "../dtos/users/UpdateUser.dto";
 import { UserModel } from "../models/UserModel";
 import bcryptjs from "bcryptjs";
-import type { User } from "../types/User";
 import { NotFoundError } from "../errors/notFoundError";
 import { UnauthorizedError } from "../errors/unauthorizedError";
+import type { FilterAndPagination } from "../types/FilterAndPagination";
+import { AppError } from "../errors/appError";
+import { ConflictError } from "../errors/conflictError";
+import type { UserResponseWithoutPassword } from "../types/UserResponseWithoutPassword";
 
 export class UserService {
   constructor() {}
   private userModel = new UserModel();
 
-  async getAllUsers() {
-    return await this.userModel.getAllUsers();
-  }
-
-  async getUserById(id: number) {
-    if (!id) {
-      throw new Error("Id não informado");
-    }
-
-    const user = await this.userModel.getUserById(id);
-
-    if (!user) {
-      throw new Error("Usuário não encontrado");
-    }
-
-    return user[0];
-  }
-
   async createNewUser(data: CreateNewUserDTO) {
     if (!data) {
-      throw new Error("Dados não informados");
+      throw new NotFoundError("Dados não informados");
+    }
+
+    const userExists = await this.userModel.getUserByEmail(data.email);
+
+    if (userExists) {
+      throw new ConflictError("Usuário já cadastrado");
     }
 
     const validData = createNewUserSchema.parse(data);
@@ -55,8 +46,39 @@ export class UserService {
     return;
   }
 
+  async getAllUsers({ page, pageSize, orderBy, filter }: FilterAndPagination) {
+    return await this.userModel.getAllUsers({
+      page,
+      pageSize,
+      orderBy,
+      filter,
+    });
+  }
+
+  async getUserById(id: number): Promise<UserResponseWithoutPassword> {
+    if (!id) {
+      throw new Error("Id não informado");
+    }
+
+    const user = await this.userModel.getUserById(id);
+
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      username: user.username,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
   async updateUser(userId: number, data: UpdateUserDTO) {
     const user = await this.userModel.getUserById(userId);
+
     if (!user) throw new NotFoundError("User not found");
 
     const payload = updateUserSchema.parse(data);
@@ -64,7 +86,7 @@ export class UserService {
     if (payload.password) {
       const valid = await bcryptjs.compare(
         payload.currentPassword!,
-        user[0].password,
+        user.password,
       );
 
       if (!valid) {
@@ -83,7 +105,7 @@ export class UserService {
       throw new Error("Id não informado");
     }
 
-    const result = await this.userModel.softDeleteUserById(id);
+    const result = await this.userModel.softDeleteUser(id);
 
     if (!result) {
       throw new Error("Erro ao deletar usuário");
