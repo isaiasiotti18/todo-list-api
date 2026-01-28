@@ -15,6 +15,20 @@
       "when": 1768947994164,
       "tag": "0001_foamy_dazzler",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1769560103222,
+      "tag": "0002_bored_fabian_cortez",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1769624782651,
+      "tag": "0003_chunky_tomas",
+      "breakpoints": true
     }
   ]
 }
