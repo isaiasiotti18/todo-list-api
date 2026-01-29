@@ -8,7 +8,7 @@ import {
 } from "../dtos/todo/UpdateTodo.dto";
 import { ConflictError } from "../errors/conflictError";
 import { NotFoundError } from "../errors/notFoundError";
-import { TodoModel } from "../models/TodoModel";
+import { TodoModel } from "../models/todo/TodoModel";
 import type { FilterAndPaginationTodo } from "../types/FilterAndPagination";
 
 export class TodoService {
@@ -74,6 +74,10 @@ export class TodoService {
 
     if (!todo) {
       throw new NotFoundError("Todo não encontrado");
+    }
+
+    if (todo[0].deletedAt !== null) {
+      throw new ConflictError("Todo ja deletado");
     }
 
     const result = await this.todoModel.softDeleteTodoById(id);
