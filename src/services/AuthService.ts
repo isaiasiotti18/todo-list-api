@@ -4,7 +4,7 @@ import {
   type RegisterUserDTO,
 } from "../dtos/auth/Register.dto";
 import { ConflictError } from "../errors/conflictError";
-import { UserModel } from "../models/UserModel";
+import { UserModel } from "../models/user/UserModel";
 
 import bcrypt from "bcryptjs";
 import { genToken } from "../utils/jwt";

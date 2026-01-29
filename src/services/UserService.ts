@@ -6,7 +6,7 @@ import {
   updateUserSchema,
   type UpdateUserDTO,
 } from "../dtos/users/UpdateUser.dto";
-import { UserModel } from "../models/UserModel";
+import { UserModel } from "../models/user/UserModel";
 import bcryptjs from "bcryptjs";
 import { NotFoundError } from "../errors/notFoundError";
 import { UnauthorizedError } from "../errors/unauthorizedError";
