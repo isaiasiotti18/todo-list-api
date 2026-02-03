@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { STATUS_CODE } from "../constants/statusCode";
+import { getTodosQuerySchema } from "../dtos/todo/GetTodosQuery.dto";
 import { TodoService } from "../services/TodoService";
-import type { FilterAndPaginationTodo } from "../types/FilterAndPagination";
 
 export class TodoController {
   constructor() {}
@@ -9,22 +9,29 @@ export class TodoController {
   private todoService = new TodoService();
 
   async createNewTodo(req: Request, res: Response) {
-    const result = await this.todoService.createNewTodo(req.body);
+    const user = req.user;
+    const userId = user?.id;
+
+    console.log("User ID from request:", userId);
+    const result = await this.todoService.createNewTodo({
+      ...req.body,
+      userId,
+    });
 
     return res.status(STATUS_CODE.CREATED).json(result);
   }
 
   async getAllTodos(req: Request, res: Response) {
-    const filters: FilterAndPaginationTodo = {
-      page: req.query.page ? Number(req.query.page) : undefined,
-      pageSize: req.query.pageSize ? Number(req.query.pageSize) : undefined,
-      orderBy: (req.query.orderBy as "asc" | "desc") || undefined,
-      filter: (req.query.filter as string) || "",
-      categoryId: req.query.categoryId
-        ? Number(req.query.categoryId)
-        : undefined,
-    };
+    const parseResult = getTodosQuerySchema.safeParse(req.query);
 
+    if (!parseResult.success) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        message: "Parâmetros de consulta inválidos",
+        errors: parseResult.error.flatten().fieldErrors,
+      });
+    }
+
+    const filters = parseResult.data;
     const user = req.user;
     const userId = user?.id;
 
@@ -45,10 +52,16 @@ export class TodoController {
   }
 
   async updateTodoById(req: Request, res: Response) {
+    const user = req.user;
+    const userId = user?.id;
+
     const { todoId } = req.params;
     const { body } = req;
 
-    const result = await this.todoService.updateTodoById(Number(todoId), body);
+    const result = await this.todoService.updateTodoById(Number(todoId), {
+      ...body,
+      userId: Number(userId),
+    });
 
     return res.status(STATUS_CODE.OK).json(result);
   }
