@@ -1,0 +1,1 @@
+ALTER TABLE `todos` ADD `todo_status` enum('in_planning','in_progress','completed','canceled','archived') DEFAULT 'in_planning' NOT NULL;

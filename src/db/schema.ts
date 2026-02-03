@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   int,
+  mysqlEnum,
   mysqlTable,
   timestamp,
   varchar,
@@ -37,10 +38,17 @@ export const categories = mysqlTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
-    // Índice para busca por nome de categoria (FULLTEXT para melhor performance)
     nameIdx: index("name_idx").on(table.name),
   }),
 );
+
+export const todoStatusEnum = mysqlEnum("todo_status", [
+  "in_planning",
+  "in_progress",
+  "completed",
+  "canceled",
+  "archived",
+]);
 
 export const todos = mysqlTable(
   "todos",
@@ -50,13 +58,13 @@ export const todos = mysqlTable(
     description: varchar({ length: 255 }),
     endDate: timestamp("end_date"),
     categoryId: int("category_id").notNull().default(1),
+    status: todoStatusEnum.notNull().default("in_planning"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     deletedAt: timestamp("deleted_at"),
     userId: int("user_id").notNull(),
   },
   (table) => ({
-    // ÍNDICES MAIS IMPORTANTES - para sua query de listagem
     // Índice composto: userId + deletedAt + createdAt (ordem importa!)
     userDeletedCreatedIdx: index("user_deleted_created_idx").on(
       table.userId,

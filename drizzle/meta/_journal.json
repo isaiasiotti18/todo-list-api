@@ -29,6 +29,13 @@
       "when": 1769624782651,
       "tag": "0003_chunky_tomas",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1769798921232,
+      "tag": "0004_tough_shocker",
+      "breakpoints": true
     }
   ]
 }
