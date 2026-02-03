@@ -7,7 +7,7 @@ import type { FilterAndPaginationTodo } from "../../types/FilterAndPagination";
 import {
   buildPaginationResult,
   validatePagination,
-} from "../helpers/pagination.helper";
+} from "../../utils/helpers/pagination.helper";
 import { buildOrderBy } from "./helpers/sorting.helper";
 import { buildAllConditions } from "./helpers/filter.helper";
 import type { PaginatedTodosResponse } from "../../types/PaginatedTodosResponse ";
@@ -20,6 +20,12 @@ export class TodoModel {
   }
 
   async updateTodoById(id: number, data: UpdateTodoDTO) {
+    const conditions = [
+      eq(todos.id, id),
+      isNull(todos.deletedAt),
+      eq(todos.userId, data.userId),
+    ];
+
     await db
       .update(todos)
       .set({
@@ -27,7 +33,7 @@ export class TodoModel {
         description: data.description,
         endDate: data.endDate,
       })
-      .where(and(eq(todos.id, id), isNull(todos.deletedAt)));
+      .where(and(...conditions));
 
     return;
   }
@@ -44,6 +50,7 @@ export class TodoModel {
       orderBy = "asc",
       filter = "",
       categoryId,
+      status,
     }: FilterAndPaginationTodo,
   ): Promise<PaginatedTodosResponse> {
     // Validação e paginação
@@ -57,6 +64,7 @@ export class TodoModel {
     const whereConditions = buildAllConditions(todos, categories, {
       userId,
       categoryId,
+      status,
       searchTerm: filter,
     });
 
@@ -70,6 +78,7 @@ export class TodoModel {
           id: todos.id,
           title: todos.title,
           description: todos.description,
+          status: todos.status,
           endDate: todos.endDate,
           categoryId: todos.categoryId,
           categoryName: categories.name,

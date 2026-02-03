@@ -1,9 +1,11 @@
 // helpers/filter.helper.ts
 import { SQL, like, or, eq, isNull, and } from "drizzle-orm";
+import type { TodoStatus } from "../../../types/TodoStatus";
 
 export interface FilterConditions {
   userId: number;
   categoryId?: number | null;
+  status?: TodoStatus;
   searchTerm?: string;
 }
 
@@ -21,6 +23,16 @@ export function addCategoryFilter<T extends Record<string, any>>(
 ): void {
   if (categoryId !== undefined && categoryId !== null) {
     conditions.push(eq(table.categoryId, categoryId));
+  }
+}
+
+export function statusCondition<T extends Record<string, any>>(
+  conditions: SQL[],
+  table: T,
+  status?: TodoStatus,
+): void {
+  if (status !== undefined && status !== null) {
+    conditions.push(eq(table.status, status));
   }
 }
 
@@ -53,6 +65,7 @@ export function buildAllConditions<
   const conditions = buildBaseConditions(todosTable, filters.userId);
 
   addCategoryFilter(conditions, todosTable, filters.categoryId);
+  statusCondition(conditions, todosTable, filters.status);
   addSearchFilter(conditions, todosTable, categoriesTable, filters.searchTerm);
 
   return and(...conditions)!;
