@@ -56,7 +56,14 @@ export class TodoService {
 
   async getAllTodosByUserId(
     userId: number,
-    { page, pageSize, orderBy, filter, categoryId }: FilterAndPaginationTodo,
+    {
+      page,
+      pageSize,
+      orderBy,
+      filter,
+      categoryId,
+      status,
+    }: FilterAndPaginationTodo,
   ) {
     const todos = await this.todoModel.getAllTodosByUserId(userId, {
       page,
@@ -64,6 +71,7 @@ export class TodoService {
       orderBy,
       filter,
       categoryId,
+      status,
     });
 
     return todos;

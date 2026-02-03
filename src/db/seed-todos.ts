@@ -1,6 +1,17 @@
 import { db } from "."; // Ajuste o caminho conforme seu projeto
 import { categories, todos } from "./schema"; // Ajuste o caminho
 import { faker } from "@faker-js/faker/locale/pt_BR"; // Usando locale pt_BR
+import type { TodoStatus } from "../types/TodoStatus";
+
+function getRandomStatus(): TodoStatus {
+  const random = Math.random();
+  // Distribuição: completed 40%, in_progress 25%, in_planning 20%, canceled 10%, archived 5%
+  if (random < 0.4) return "completed";
+  if (random < 0.65) return "in_progress";
+  if (random < 0.85) return "in_planning";
+  if (random < 0.95) return "canceled";
+  return "archived";
+}
 
 async function seed() {
   console.log("🌱 Iniciando seed...");
@@ -88,6 +99,7 @@ async function seed() {
           : null,
         endDate,
         categoryId,
+        status: getRandomStatus(),
         userId,
         createdAt,
         updatedAt,
