@@ -1,3 +1,5 @@
+import type { TodoStatus } from "./TodoStatus";
+
 export type FilterAndPagination = {
   page?: number;
   pageSize?: number;
@@ -7,4 +9,5 @@ export type FilterAndPagination = {
 
 export type FilterAndPaginationTodo = FilterAndPagination & {
   categoryId?: number;
+  status?: TodoStatus;
 };
